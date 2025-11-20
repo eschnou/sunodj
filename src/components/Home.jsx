@@ -1,90 +1,168 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { generateRoomSlug } from '../utils/slugGenerator';
+import { generateCharacter } from '../../character-generator/src/index.js';
+import { generateRoomSlug } from '../utils/slugGenerator.js';
+import './Home.css';
 
 function Home() {
+  const [step, setStep] = useState(1);
+  const [character, setCharacter] = useState(null);
+  const [roomCode, setRoomCode] = useState('');
   const navigate = useNavigate();
-  const [roomSlug, setRoomSlug] = useState('');
 
+  // Générer un personnage initial au chargement
+  useEffect(() => {
+    const initialCharacter = generateCharacter();
+    setCharacter(initialCharacter);
+  }, []);
+
+  // Randomize character
+  const handleRandomize = () => {
+    const newCharacter = generateCharacter();
+    setCharacter(newCharacter);
+  };
+
+  // Continue vers l'étape 2
+  const handleContinue = () => {
+    setStep(2);
+  };
+
+  // Retour vers l'étape 1
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  // Créer une nouvelle room (logique de la branche main)
   const handleCreateRoom = () => {
     const slug = generateRoomSlug();
     console.log('[Home] Creating room with slug:', slug);
+
+    // Sauvegarder le character
+    if (character) {
+      localStorage.setItem('sunorooms_character', JSON.stringify(character));
+    }
+
+    // Naviguer vers la room en mode DJ
     navigate(`/room/${slug}?dj=true`);
   };
 
+  // Rejoindre une room existante (logique de la branche main)
   const handleJoinRoom = (e) => {
     e.preventDefault();
-    if (roomSlug.trim()) {
-      console.log('[Home] Joining room:', roomSlug);
-      navigate(`/room/${roomSlug.trim()}`);
+    if (roomCode.trim()) {
+      console.log('[Home] Joining room:', roomCode.trim());
+
+      // Sauvegarder le character
+      if (character) {
+        localStorage.setItem('sunorooms_character', JSON.stringify(character));
+      }
+
+      // Naviguer vers la room
+      navigate(`/room/${roomCode.trim()}`);
     }
   };
 
   return (
-    <div style={{ padding: '2rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-      <h1 style={{ color: '#fff' }}>🎵 SunoRooms</h1>
-      <p style={{ color: '#fff' }}>Listen to music together in sync</p>
+    <div className="home-container">
+      <div className="home-content">
+        <h1 className="home-title">🎵 SunoRooms</h1>
+        <p className="home-subtitle">Listen to music together in sync</p>
 
-      <div style={{ marginTop: '3rem' }}>
-        <button
-          onClick={handleCreateRoom}
-          style={{
-            padding: '1rem 2rem',
-            fontSize: '1.2rem',
-            cursor: 'pointer',
-            backgroundColor: '#646cff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            width: '100%',
-            maxWidth: '300px',
-          }}
-        >
-          Create New Room
-        </button>
-      </div>
-
-      <div style={{ margin: '2rem 0', color: '#888' }}>
-        — or —
-      </div>
-
-      <form onSubmit={handleJoinRoom} style={{ marginTop: '2rem' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', maxWidth: '400px', margin: '0 auto' }}>
-          <input
-            type="text"
-            value={roomSlug}
-            onChange={(e) => setRoomSlug(e.target.value)}
-            placeholder="Enter room name (e.g. funky-tiger-42)"
-            style={{
-              flex: 1,
-              padding: '0.75rem 1rem',
-              fontSize: '1rem',
-              border: '1px solid #444',
-              borderRadius: '8px',
-              backgroundColor: '#1a1a1a',
-              color: 'white',
-            }}
-          />
-          <button
-            type="submit"
-            disabled={!roomSlug.trim()}
-            style={{
-              padding: '0.75rem 1.5rem',
-              fontSize: '1rem',
-              cursor: roomSlug.trim() ? 'pointer' : 'not-allowed',
-              backgroundColor: roomSlug.trim() ? '#28a745' : '#444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-            }}
-          >
-            Join Room
-          </button>
+        {/* Progress indicator */}
+        <div className="progress-steps">
+          <div className={`step ${step >= 1 ? 'active' : ''}`}>
+            <div className="step-number">1</div>
+            <div className="step-label">Create Character</div>
+          </div>
+          <div className="step-divider"></div>
+          <div className={`step ${step >= 2 ? 'active' : ''}`}>
+            <div className="step-number">2</div>
+            <div className="step-label">Join or Create Room</div>
+          </div>
         </div>
-      </form>
 
-      <div style={{ marginTop: '3rem', color: '#888', fontSize: '0.9rem' }}>
-        <p>Create a room or join an existing one by entering its name</p>
+        {/* ÉTAPE 1 - Créer ton personnage */}
+        {step === 1 && (
+          <div className="step-content step-1">
+            <h2>Create Your Character</h2>
+            <p className="step-description">
+              This is your avatar in the dancing room!
+            </p>
+
+            <div className="character-preview">
+              {character && (
+                <div
+                  className="character-display"
+                  dangerouslySetInnerHTML={{ __html: character.svg }}
+                />
+              )}
+            </div>
+
+            <div className="step-actions">
+              <button className="btn btn-secondary" onClick={handleRandomize}>
+                🎲 Randomize
+              </button>
+              <button className="btn btn-primary" onClick={handleContinue}>
+                Continue →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ÉTAPE 2 - Créer ou Rejoindre une room */}
+        {step === 2 && (
+          <div className="step-content step-2">
+            <h2>Your Character</h2>
+
+            <div className="character-preview-small">
+              {character && (
+                <div
+                  className="character-display-small"
+                  dangerouslySetInnerHTML={{ __html: character.svg }}
+                />
+              )}
+            </div>
+
+            <div className="room-options">
+              <div className="room-option">
+                <h3>Create New Room</h3>
+                <p>Start a new room and invite your friends</p>
+                <button className="btn btn-create" onClick={handleCreateRoom}>
+                  🎉 Create Room
+                </button>
+              </div>
+
+              <div className="divider-or">
+                <span>OR</span>
+              </div>
+
+              <div className="room-option">
+                <h3>Join Existing Room</h3>
+                <p>Enter a room code to join</p>
+                <form onSubmit={handleJoinRoom}>
+                  <input
+                    type="text"
+                    className="room-code-input"
+                    placeholder="Enter room code (e.g. funky-tiger-42)"
+                    value={roomCode}
+                    onChange={(e) => setRoomCode(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className="btn btn-join"
+                    disabled={!roomCode.trim()}
+                  >
+                    🚪 Join Room
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <button className="btn btn-back" onClick={handleBack}>
+              ← Back to Character
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

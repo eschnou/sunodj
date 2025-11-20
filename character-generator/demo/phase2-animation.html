@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Generator - Phase 2 Dancing Animation</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #667eea;
+      font-size: 36px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #E3F2FD 0%, #FFF9C4 100%);
+      padding: 25px;
+      border-radius: 12px;
+      border-left: 5px solid #2196F3;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-box h3 {
+      margin-bottom: 12px;
+      color: #1976D2;
+      font-size: 20px;
+    }
+
+    .info-box p {
+      line-height: 1.8;
+      color: #555;
+      font-size: 15px;
+    }
+
+    .info-box strong {
+      color: #F57C00;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-generate {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-generate:hover {
+      background: #5568d3;
+    }
+
+    .btn-animate {
+      background: #FF6B6B;
+      color: white;
+      font-size: 20px;
+      padding: 15px 40px;
+    }
+
+    .btn-animate:hover {
+      background: #EE5A52;
+    }
+
+    .btn-animate.dancing {
+      background: #51CF66;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .main-display {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 50px;
+      padding: 40px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .character-container {
+      background: white;
+      border: 4px solid #333;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .character-display {
+      width: 300px;
+      height: 450px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 50px 0 30px;
+      color: #667eea;
+      font-size: 28px;
+    }
+
+    .test-section {
+      background: #FFF3E0;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border-left: 5px solid #FF9800;
+    }
+
+    .test-section h3 {
+      color: #E65100;
+      margin-bottom: 15px;
+    }
+
+    .test-section p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .gallery-item {
+      background: white;
+      border: 3px solid #333;
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      border-color: #667eea;
+    }
+
+    .gallery-character {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 2/3;
+    }
+
+    .gallery-label {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+      font-weight: bold;
+    }
+
+    /* ============================================ */
+    /* ANIMATIONS DANCING - UNE SEULE ANIMATION    */
+    /* ============================================ */
+
+    /* Animation principale - balancement du corps */
+    @keyframes dance-bounce {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-12px) rotate(-4deg);
+      }
+      75% {
+        transform: translateY(-12px) rotate(4deg);
+      }
+    }
+
+    /* Animation de la tête - hochement */
+    @keyframes head-bob {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-6px) rotate(3deg);
+      }
+    }
+
+    /* Animation jambe gauche */
+    @keyframes leg-left-kick {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      50% {
+        transform: rotate(-12deg);
+      }
+    }
+
+    /* Animation jambe droite */
+    @keyframes leg-right-kick {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      50% {
+        transform: rotate(12deg);
+      }
+    }
+
+    /* Animation cheveux - mouvement fluide */
+    @keyframes hair-sway {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      50% {
+        transform: rotate(6deg);
+      }
+    }
+
+    /* CLASSE DANCING - Active toutes les animations */
+    .character-root.dancing {
+      animation: dance-bounce 0.6s ease-in-out infinite;
+    }
+
+    .character-root.dancing .head {
+      animation: head-bob 0.4s ease-in-out infinite;
+      transform-origin: center center;
+    }
+
+    .character-root.dancing #leg-left {
+      animation: leg-left-kick 0.6s ease-in-out infinite;
+      transform-origin: 90px 200px;
+    }
+
+    .character-root.dancing #leg-right {
+      animation: leg-right-kick 0.6s ease-in-out infinite 0.3s;
+      transform-origin: 110px 200px;
+    }
+
+    .character-root.dancing .hair {
+      animation: hair-sway 0.5s ease-in-out infinite;
+      transform-origin: 100px 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎵 Character Generator - Phase 2</h1>
+    <p class="subtitle">Dancing Animation POC - UNE animation universelle</p>
+
+    <div class="info-box">
+      <h3>💡 Comment ça marche ?</h3>
+      <p>
+        Grâce à l'<strong>architecture SVG unifiée</strong> de la Phase 1, tous les personnages ont les <strong>mêmes IDs fixes</strong>
+        (<code>#head</code>, <code>#body</code>, <code>#leg-left</code>, <code>#leg-right</code>, <code>.hair</code>, etc.).
+      </p>
+      <p style="margin-top: 10px;">
+        Résultat : <strong>UNE SEULE animation CSS</strong> fonctionne sur <strong>100% des personnages générés</strong>,
+        peu importe leur forme de tête, leurs cheveux, ou leurs vêtements !
+      </p>
+      <p style="margin-top: 10px;">
+        👉 <strong>Cliquez sur "🎉 ANIMATE" pour faire danser le personnage !</strong>
+      </p>
+    </div>
+
+    <div class="controls">
+      <button class="btn-generate" onclick="generateRandom()">
+        🎲 Generate Random Character
+      </button>
+      <button class="btn-animate" id="animateBtn" onclick="toggleAnimation()">
+        🎉 ANIMATE
+      </button>
+    </div>
+
+    <div class="main-display">
+      <div class="character-container">
+        <div id="mainCharacter" class="character-display"></div>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h3>🧪 TEST - Validation de l'animation universelle</h3>
+      <p><strong>Instructions :</strong></p>
+      <p>1. Cliquez plusieurs fois sur "Generate Random Character" pour créer différents personnages</p>
+      <p>2. Cliquez sur "ANIMATE" pour chaque personnage</p>
+      <p>3. <strong>Vérifiez que la même animation fonctionne parfaitement sur TOUS les personnages</strong></p>
+      <p>✅ <strong>Succès</strong> : Aucun personnage ne nécessite d'ajustement CSS spécifique !</p>
+    </div>
+
+    <h2>🎨 Gallery - Test avec plusieurs personnages</h2>
+    <p style="text-align: center; color: #666; margin-bottom: 20px;">
+      Cliquez sur un personnage pour l'afficher et le faire danser
+    </p>
+    <div id="gallery" class="gallery"></div>
+  </div>
+
+  <script type="module">
+    import { generateCharacter } from '../src/index.js';
+
+    let currentCharacter = null;
+    let isAnimating = false;
+
+    // Génération aléatoire
+    window.generateRandom = function() {
+      console.log('Generating random character...');
+      currentCharacter = generateCharacter();
+      displayCharacter(currentCharacter);
+      // Réinitialiser l'animation
+      isAnimating = false;
+      updateAnimateButton();
+    };
+
+    // Affichage du personnage
+    function displayCharacter(char) {
+      const container = document.getElementById('mainCharacter');
+      container.innerHTML = char.svg;
+      console.log('Character displayed');
+    }
+
+    // Toggle animation - CODE ULTRA SIMPLE
+    window.toggleAnimation = function() {
+      const container = document.getElementById('mainCharacter');
+      const root = container.querySelector('.character-root');
+
+      if (root) {
+        isAnimating = !isAnimating;
+
+        if (isAnimating) {
+          root.classList.add('dancing');
+          console.log('Animation started');
+        } else {
+          root.classList.remove('dancing');
+          console.log('Animation stopped');
+        }
+
+        updateAnimateButton();
+      }
+    };
+
+    // Mise à jour visuelle du bouton
+    function updateAnimateButton() {
+      const btn = document.getElementById('animateBtn');
+      if (isAnimating) {
+        btn.classList.add('dancing');
+        btn.textContent = '⏸️ STOP DANCING';
+      } else {
+        btn.classList.remove('dancing');
+        btn.textContent = '🎉 ANIMATE';
+      }
+    }
+
+    // Génération de la galerie avec 6 personnages différents
+    function generateGallery() {
+      console.log('Generating gallery...');
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+
+      for (let i = 0; i < 6; i++) {
+        const seed = `gallery-${i}`;
+        const char = generateCharacter({ seed });
+
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.title = 'Click to view and animate';
+
+        // Click pour afficher et animer
+        item.onclick = () => {
+          currentCharacter = char;
+          displayCharacter(char);
+
+          // Auto-démarrer l'animation après affichage
+          setTimeout(() => {
+            const container = document.getElementById('mainCharacter');
+            const root = container.querySelector('.character-root');
+            if (root) {
+              root.classList.add('dancing');
+              isAnimating = true;
+              updateAnimateButton();
+            }
+          }, 100);
+
+          // Scroll vers le personnage principal
+          document.querySelector('.main-display').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        };
+
+        const charDiv = document.createElement('div');
+        charDiv.className = 'gallery-character';
+        charDiv.innerHTML = char.svg;
+
+        const label = document.createElement('div');
+        label.className = 'gallery-label';
+        label.textContent = `Character ${i + 1}`;
+
+        item.appendChild(charDiv);
+        item.appendChild(label);
+        gallery.appendChild(item);
+
+        // Hover pour preview de l'animation
+        item.addEventListener('mouseenter', () => {
+          const root = charDiv.querySelector('.character-root');
+          if (root) root.classList.add('dancing');
+        });
+
+        item.addEventListener('mouseleave', () => {
+          const root = charDiv.querySelector('.character-root');
+          if (root) root.classList.remove('dancing');
+        });
+      }
+
+      console.log('Gallery generated with 6 characters');
+    }
+
+    // Initialisation au chargement
+    console.log('Phase 2 - Dancing Animation Demo initialized');
+    generateRandom();
+    generateGallery();
+  </script>
+</body>
+</html>
